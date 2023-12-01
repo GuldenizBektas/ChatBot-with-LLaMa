@@ -1,6 +1,8 @@
 # Chat-LLaMa
 With Chat-LLaMa you can get answers about LLMs. Please make sure you check out the knowledge base. You can find knowledge base in <a href="https://github.com/GuldenizBektas/ChatBot-with-LLaMa/tree/main/data">**data**</a> folder.
 
+Install the model from <a href="https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/blob/main/llama-2-7b-chat.ggmlv3.q2_K.bin">HuggingFace</a>.
+
 Before running the app you need to add knowledge to a vector space. Do this by:
 ```
 python store_vector_space.py
