@@ -3,6 +3,7 @@ import streamlit as st
 from langchain.llms import CTransformers
 from langchain import PromptTemplate
 from langchain.chains import RetrievalQA
+from langchain.memory import ConversationBufferMemory
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader
@@ -55,6 +56,7 @@ def load_prompt_template():
     If you don't know the answer, respond with "I do not know.".
 
     Context: {context}
+    History: {history}
     Question: {question}
     Answer:
     """
@@ -79,7 +81,10 @@ def create_qa_chain():
                                         chain_type='stuff',
                                         retriever=retriever,
                                         return_source_documents=True,
-                                        chain_type_kwargs={'prompt': prompt})
+                                        chain_type_kwargs={'prompt': prompt,
+                                                          "memory": ConversationBufferMemory(
+                                                                        memory_key="history",
+                                                                        input_key="question")})
     
     return qa_chain
 
