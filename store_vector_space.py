@@ -21,3 +21,5 @@ db = FAISS.from_documents(texts, embeddings)
 
 # save the vector store
 db.save_local("faiss")
+
+print("DONE SAVING!)")
