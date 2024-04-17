@@ -45,7 +45,7 @@ def load_vector_store():
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         model_kwargs={'device': 'cpu'})
-    db = FAISS.load_local("faiss", embeddings)
+    db = FAISS.load_local("faiss", embeddings, allow_dangerous_deserialization=True)
     return db
 
 @st.cache_data()
