@@ -15,7 +15,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+# API key for OpenAI
+# openai_api_key = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(
     page_title="Assistant",
