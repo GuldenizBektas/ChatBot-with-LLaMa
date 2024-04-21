@@ -3,3 +3,7 @@ env*
 *env
 .ipynb_checkpoints
 model/
+data/
+data2/
+faiss/
+faiss2/
