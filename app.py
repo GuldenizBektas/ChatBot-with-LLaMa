@@ -1,13 +1,21 @@
 import time
+import os 
+from dotenv import load_dotenv
 import streamlit as st
+from langchain_openai import ChatOpenAI
 from langchain.llms import CTransformers
 from langchain import PromptTemplate
 from langchain.chains import RetrievalQA
+from langchain_openai import OpenAIEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+load_dotenv()
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(
     page_title="Assistant",
@@ -33,19 +41,22 @@ for message in st.session_state.messages:
 @st.cache_resource()
 def load_llm():
     # load the llm with ctransformers
-    llm = CTransformers(model='model/llama-2-7b-chat.ggmlv3.q2_K.bin', # model available here: https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/tree/main
-                    model_type='llama',
-                    config={'max_new_tokens': 256, 'temperature': 0})
+    # llm = CTransformers(model='model/llama-2-7b-chat.ggmlv3.q2_K.bin', # model available here: https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/tree/main
+    #                 model_type='llama',
+    #                 config={'max_new_tokens': 256, 'temperature': 0})
+    llm = ChatOpenAI(model="gpt-4-turbo", temperature=0)
+
     return llm
 
 @st.cache_resource()
 def load_vector_store():
 
     # load the vector store
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cpu'})
-    db = FAISS.load_local("faiss", embeddings, allow_dangerous_deserialization=True)
+    # embeddings = HuggingFaceEmbeddings(
+    #     model_name="sentence-transformers/all-MiniLM-L6-v2",
+    #     model_kwargs={'device': 'cpu'})
+    embeddings = OpenAIEmbeddings()
+    db = FAISS.load_local("faiss2", embeddings, allow_dangerous_deserialization=True)
     return db
 
 @st.cache_data()
@@ -63,7 +74,7 @@ def load_prompt_template():
 
     prompt = PromptTemplate(
                             template=template,
-                            input_variables=['context', 'question']
+                            input_variables=['context', 'history', 'question']
                             )
 
     return prompt 
@@ -76,15 +87,18 @@ def create_qa_chain():
     prompt = load_prompt_template()
 
     # create the qa_chain
-    retriever = db.as_retriever(search_kwargs={'k': 2})
+    retriever = db.as_retriever()
+    #memory = ConversationBufferMemory(k=3, output_key="result", memory_key='history', input_key="question")
     qa_chain = RetrievalQA.from_chain_type(llm=llm,
                                         chain_type='stuff',
                                         retriever=retriever,
+                                        #memory=memory,
                                         return_source_documents=True,
                                         chain_type_kwargs={'prompt': prompt,
                                                           "memory": ConversationBufferMemory(
                                                                         memory_key="history",
-                                                                        input_key="question")})
+                                                                        input_key="question")
+                                                        })
     
     return qa_chain
 
